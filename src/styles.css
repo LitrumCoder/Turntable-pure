@@ -1,0 +1,1455 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  font: 11px/1.25 "Segoe UI", system-ui, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+.deck {
+  --glow: transparent;
+  --label-color: #e0463a;
+  --lamp-off: #4d3a37;
+  --lamp-on: #e0463a;
+  position: absolute;
+  inset: 10px;
+}
+
+.deck::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  box-shadow: 0 0 16px 2px var(--glow);
+  opacity: 0;
+  transition: opacity 1.2s ease, box-shadow 1.2s ease;
+  pointer-events: none;
+}
+
+.deck.playing.lit::before {
+  opacity: 0.85;
+}
+
+.lamp {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--lamp-off);
+  transition: background 0.4s, box-shadow 0.4s;
+}
+
+.deck.playing .lamp {
+  background: var(--lamp-on);
+  box-shadow: 0 0 5px var(--lamp-on);
+}
+
+.platter,
+.mat,
+.slot,
+.record,
+.sheen {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.slot.leaving {
+  pointer-events: none;
+}
+
+.mat-ring {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.mat-ring circle {
+  fill: none;
+  stroke: #dcdeda;
+  stroke-width: 4.2;
+}
+
+.mat-ring text {
+  font: 600 2.3px "Segoe UI", sans-serif;
+  fill: #2a2a2a;
+}
+
+.record {
+  inset: 0;
+  background:
+    radial-gradient(
+      closest-side,
+      transparent 0 35.5%,
+      #0b0b0b 36%,
+      #1c1c1c 38.5%,
+      #101010 41%,
+      #181818 43.5%,
+      transparent 44.5%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent 0 52%,
+      rgba(255, 255, 255, 0.07) 52.4%,
+      rgba(0, 0, 0, 0.55) 53%,
+      transparent 53.6% 63%,
+      rgba(255, 255, 255, 0.07) 63.4%,
+      rgba(0, 0, 0, 0.55) 64%,
+      transparent 64.6% 74%,
+      rgba(255, 255, 255, 0.07) 74.4%,
+      rgba(0, 0, 0, 0.55) 75%,
+      transparent 75.6% 85%,
+      rgba(255, 255, 255, 0.07) 85.4%,
+      rgba(0, 0, 0, 0.55) 86%,
+      transparent 86.6%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent 0 95%,
+      #202020 96%,
+      #080808 98.4%,
+      #2c2c2c 99.3%,
+      transparent 100%
+    ),
+    repeating-radial-gradient(circle, #141414 0 0.75px, #1e1e1e 1px, #131313 1.5px),
+    #151515;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  will-change: transform;
+}
+
+.deck.empty .slot:not(.leaving) {
+  opacity: 0;
+}
+
+.label {
+  position: absolute;
+  left: 32%;
+  top: 32%;
+  width: 36%;
+  height: 36%;
+  border-radius: 50%;
+  background: var(--label-color) center / cover no-repeat;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.label::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      closest-side,
+      transparent 0 84%,
+      rgba(0, 0, 0, 0.22) 90%,
+      rgba(255, 255, 255, 0.18) 93%,
+      rgba(0, 0, 0, 0.4) 100%
+    ),
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.16), transparent 55%);
+  pointer-events: none;
+}
+
+.label.fresh {
+  animation: label-in 0.6s ease;
+}
+
+@keyframes label-in {
+  from {
+    opacity: 0.15;
+    filter: blur(3px);
+  }
+}
+
+.label.blank {
+  background-image: radial-gradient(
+    closest-side,
+    transparent 0 68%,
+    rgba(255, 255, 255, 0.18) 68% 71%,
+    transparent 71%
+  );
+}
+
+.label.blank::after {
+  content: "33⅓";
+  position: absolute;
+  top: 18%;
+  width: 100%;
+  text-align: center;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sheen {
+  pointer-events: none;
+  background: conic-gradient(
+    transparent 0 95deg,
+    rgba(255, 255, 255, 0.04) 110deg,
+    rgba(255, 255, 255, 0.13) 128deg,
+    rgba(255, 255, 255, 0.04) 146deg,
+    transparent 165deg 272deg,
+    rgba(255, 255, 255, 0.05) 288deg,
+    rgba(255, 255, 255, 0.17) 307deg,
+    rgba(255, 255, 255, 0.05) 326deg,
+    transparent 345deg
+  );
+  -webkit-mask: radial-gradient(closest-side, transparent 0 37%, #000 46% 90%, rgba(0, 0, 0, 0.55) 100%);
+  mask: radial-gradient(closest-side, transparent 0 37%, #000 46% 90%, rgba(0, 0, 0, 0.55) 100%);
+  mix-blend-mode: screen;
+}
+
+.spindle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff, #9a9d99);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.armbase,
+.armrest,
+.pivot,
+.panel {
+  position: absolute;
+}
+
+.tonearm {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  filter: drop-shadow(1px 2px 1px rgba(0, 0, 0, 0.45));
+  transition: filter 0.35s ease;
+  will-change: transform;
+}
+
+.tonearm.lifted {
+  filter: drop-shadow(4px 7px 4px rgba(0, 0, 0, 0.4));
+}
+
+.arm {
+  position: absolute;
+  left: -30px;
+  top: -50px;
+  overflow: visible;
+}
+
+.arm > g {
+  display: none;
+}
+
+.skin-braun .arm-braun,
+.skin-pioneer .arm-s,
+.skin-dual .arm-dual,
+.skin-studio .arm-studio {
+  display: inline;
+}
+
+.plate,
+.strip,
+.dial {
+  display: none;
+}
+
+.plate,
+.strip {
+  position: absolute;
+}
+
+.tube,
+.tube-light {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tube {
+  stroke: #9a9e9a;
+  stroke-width: 4;
+}
+
+.tube-light {
+  stroke: #f7f8f4;
+  stroke-width: 1.3;
+  transform: translateX(-0.6px);
+}
+
+.line {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.line.scroll {
+  text-overflow: clip;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6px, #000 calc(100% - 6px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6px, #000 calc(100% - 6px), transparent);
+}
+
+.line.scroll > span {
+  display: inline-block;
+  animation: marquee var(--duration, 8s) ease-in-out infinite alternate;
+}
+
+@keyframes marquee {
+  0%,
+  20% {
+    transform: translateX(0);
+  }
+  80%,
+  100% {
+    transform: translateX(var(--shift, 0));
+  }
+}
+
+.line-combined {
+  display: none;
+}
+
+button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+
+button svg {
+  fill: currentColor;
+}
+
+.play .icon-pause,
+.deck.playing .play .icon-play,
+.when-playing,
+.deck.playing .when-stopped {
+  display: none;
+}
+
+.deck.playing .play .icon-pause,
+.deck.playing .when-playing {
+  display: inline;
+}
+
+.key em {
+  font-style: normal;
+}
+
+/* Braun */
+
+.skin-braun {
+  --arm-rest: 0;
+  --arm-start: 15;
+  --arm-end: 35;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #363e3c, #2e3533 45%, #272d2b);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.45),
+    0 0 1px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.skin-braun .lamp {
+  left: 14px;
+  top: 10px;
+}
+
+.skin-braun .platter {
+  left: 9px;
+  top: 22px;
+  width: 176px;
+  height: 176px;
+  background: radial-gradient(closest-side, #d6d7d2 0 80%, #eceee9 92%, #a9aba6 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.skin-braun .mat,
+.skin-braun .slot,
+.skin-braun .sheen {
+  inset: 3px;
+}
+
+.skin-braun .mat {
+  background: radial-gradient(closest-side, #cdcec9 0 34%, #c2c3be 35% 36%, #cdcec9 37% 96%, #b4b5b0 100%);
+}
+
+.skin-braun .armbase,
+.skin-braun .screw,
+.skin-braun .brand,
+.skin-braun .key span,
+.skin-braun .line-title,
+.skin-braun .line-artist {
+  display: none;
+}
+
+.skin-braun .line-combined {
+  display: block;
+}
+
+.skin-braun .armrest {
+  left: 189px;
+  top: 118px;
+  width: 12px;
+  height: 10px;
+  border-radius: 3px;
+  background: #272d2b;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.skin-braun .tonearm {
+  left: 195px;
+  top: 28px;
+}
+
+.skin-braun .pivot {
+  left: 184px;
+  top: 17px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #f3f4f0, #a3a7a3 70%, #7c817d);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+}
+
+.skin-braun .pivot::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: #5c625f;
+}
+
+.skin-braun .panel {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22px;
+}
+
+.skin-braun .nameplate {
+  position: absolute;
+  left: 14px;
+  bottom: 5px;
+}
+
+.skin-braun .caption {
+  max-width: 192px;
+  color: #d3d8d5;
+  transition: max-width 0.25s ease;
+}
+
+.skin-braun .caption.idle {
+  color: #7d8682;
+}
+
+.skin-braun:hover .caption {
+  max-width: 116px;
+}
+
+.skin-braun .controls {
+  position: absolute;
+  right: 10px;
+  bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.skin-braun:hover .controls {
+  opacity: 1;
+}
+
+.skin-braun .controls button {
+  width: 18px;
+  height: 18px;
+  background: #454d4b;
+  color: #d3d8d5;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.skin-braun .controls button svg {
+  width: 8px;
+  height: 8px;
+}
+
+.skin-braun .controls .play {
+  width: 22px;
+  height: 22px;
+  background: #e0463a;
+  color: #fff;
+}
+
+.skin-braun .controls .play svg {
+  width: 9px;
+  height: 9px;
+}
+
+/* Pioneer и Dual: общая геометрия */
+
+.skin-pioneer,
+.skin-dual {
+  --arm-rest: 24;
+  --arm-start: 34.9;
+  --arm-end: 53.9;
+  border-radius: 7px;
+}
+
+:is(.skin-pioneer, .skin-dual) .platter {
+  left: 10px;
+  top: 7px;
+  width: 186px;
+  height: 186px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.55);
+}
+
+:is(.skin-pioneer, .skin-dual) .mat,
+:is(.skin-pioneer, .skin-dual) .sheen {
+  inset: 6px;
+}
+
+:is(.skin-pioneer, .skin-dual) .slot {
+  inset: 9px;
+}
+
+:is(.skin-pioneer, .skin-dual) .armrest {
+  left: 207px;
+  top: 92px;
+  width: 10px;
+  height: 7px;
+  border-radius: 2px;
+  background: #141414;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+:is(.skin-pioneer, .skin-dual) .tonearm {
+  left: 232px;
+  top: 50px;
+}
+
+:is(.skin-pioneer, .skin-dual) .pivot {
+  left: 223px;
+  top: 41px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+}
+
+:is(.skin-pioneer, .skin-dual) .lamp {
+  left: 15px;
+  top: 220px;
+}
+
+:is(.skin-pioneer, .skin-dual) .panel {
+  left: 4px;
+  right: 4px;
+  top: 199px;
+  bottom: 4px;
+  border-radius: 3px;
+}
+
+:is(.skin-pioneer, .skin-dual) .screw {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #f2f2f0, #8b8e8a 70%, #5b5e5a);
+  box-shadow: 0 0.5px 0.5px rgba(0, 0, 0, 0.4);
+}
+
+:is(.skin-pioneer, .skin-dual) .screw:nth-of-type(1) {
+  left: 3px;
+  top: 3px;
+}
+
+:is(.skin-pioneer, .skin-dual) .screw:nth-of-type(2) {
+  right: 3px;
+  top: 3px;
+}
+
+:is(.skin-pioneer, .skin-dual) .screw:nth-of-type(3) {
+  left: 3px;
+  bottom: 3px;
+}
+
+:is(.skin-pioneer, .skin-dual) .screw:nth-of-type(4) {
+  right: 3px;
+  bottom: 3px;
+}
+
+:is(.skin-pioneer, .skin-dual) .nameplate {
+  position: absolute;
+  left: 25px;
+  right: 88px;
+  top: 5px;
+  bottom: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+:is(.skin-pioneer, .skin-dual) .brand {
+  font: 700 6.5px/1 "Segoe UI", sans-serif;
+  letter-spacing: 3px;
+}
+
+:is(.skin-pioneer, .skin-dual) .caption {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+:is(.skin-pioneer, .skin-dual) .line-title {
+  font: 600 11px/1.25 "Segoe UI", sans-serif;
+}
+
+:is(.skin-pioneer, .skin-dual) .line-artist {
+  font: 9px/1.25 "Segoe UI", sans-serif;
+  letter-spacing: 0.3px;
+}
+
+:is(.skin-pioneer, .skin-dual) .controls {
+  position: absolute;
+  right: 6px;
+  top: 10px;
+  display: flex;
+  gap: 3px;
+}
+
+:is(.skin-pioneer, .skin-dual) .key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 22px;
+}
+
+:is(.skin-pioneer, .skin-dual) .controls button {
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+:is(.skin-pioneer, .skin-dual) .controls button svg {
+  display: none;
+}
+
+:is(.skin-pioneer, .skin-dual) .key span {
+  font: 700 5.5px/1 "Segoe UI", sans-serif;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+:is(.skin-pioneer, .skin-dual) .key .start {
+  padding: 1px 2px;
+  border-radius: 1px;
+}
+
+/* Pioneer */
+
+.skin-pioneer {
+  --label-color: #1d3f7a;
+  --lamp-off: #5a2520;
+  --lamp-on: #ff4a36;
+  background:
+    repeating-linear-gradient(178deg, transparent 0 3px, rgba(0, 0, 0, 0.07) 3px 4px, transparent 4px 9px, rgba(255, 255, 255, 0.035) 9px 10px),
+    repeating-linear-gradient(182deg, rgba(0, 0, 0, 0.05) 0 17px, transparent 17px 31px, rgba(80, 30, 0, 0.08) 31px 37px),
+    linear-gradient(180deg, #6c4529, #5d3a21 45%, #4f2f1a);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.5),
+    0 0 1px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.skin-pioneer .platter {
+  background: radial-gradient(closest-side, #0e0e0e 0 93.5%, #f2f3ef 94.5%, #d2d4cf 97%, #7e817d 100%);
+}
+
+.skin-pioneer .mat {
+  background: radial-gradient(
+    closest-side,
+    #1c1c1c 0 27%,
+    #262626 27.5% 29%,
+    #1c1c1c 29.5% 64%,
+    #262626 64.5% 66%,
+    #1b1b1b 66.5% 97%,
+    #111 100%
+  );
+}
+
+.skin-pioneer .mat-ring {
+  display: block;
+}
+
+.skin-pioneer .armbase {
+  left: 207px;
+  top: 34px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 18% 64%, #6d706c 0 1.3px, transparent 1.8px),
+    radial-gradient(circle at 70% 20%, #6d706c 0 1.3px, transparent 1.8px),
+    radial-gradient(circle at 54% 88%, #6d706c 0 1.3px, transparent 1.8px),
+    conic-gradient(#d9dbd6, #f6f7f3, #bfc1bc, #eceee9, #c6c8c3, #f4f5f1, #d9dbd6);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.skin-pioneer .pivot {
+  background: radial-gradient(circle, #e9eae6 0 3px, #2a2a2a 3.5px 7px, #6c706c 7.5px);
+}
+
+.skin-pioneer .panel {
+  color: #222;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.22) 0 1px, rgba(0, 0, 0, 0.035) 1px 2px, transparent 2px 3px),
+    linear-gradient(180deg, #eceeea, #cfd1cc 70%, #c3c5c0);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.skin-pioneer .line-artist {
+  color: #555;
+}
+
+.skin-pioneer .controls button {
+  border: 1px solid #6f736f;
+  background:
+    radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.95) 0 18%, transparent 45%),
+    radial-gradient(circle, #d9dbd6 0 48%, transparent 50%),
+    repeating-conic-gradient(#9a9e9a 0 8deg, #eef0ec 8deg 16deg);
+}
+
+.skin-pioneer .key .start {
+  background: #151515;
+  color: #f3f3f3;
+}
+
+/* Dual */
+
+.skin-dual {
+  --label-color: #7b1e1e;
+  --lamp-off: #4a3a22;
+  --lamp-on: #ffb02e;
+  background:
+    repeating-linear-gradient(178deg, transparent 0 4px, rgba(60, 25, 0, 0.09) 4px 5px, transparent 5px 11px, rgba(255, 230, 190, 0.05) 11px 12px),
+    repeating-linear-gradient(182deg, rgba(60, 25, 0, 0.06) 0 21px, transparent 21px 39px),
+    linear-gradient(180deg, #a76d3e, #965f33 50%, #84522b);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.5),
+    0 0 1px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 235, 200, 0.2),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.25);
+}
+
+.skin-dual .platter {
+  background: radial-gradient(closest-side, #111 0 93.5%, #f6f7f3 94.5%, #dcded9 97%, #8a8d89 100%);
+}
+
+.skin-dual .mat {
+  background:
+    radial-gradient(closest-side, #1b1b1b 0 30%, transparent 30.5%),
+    repeating-radial-gradient(circle, #1b1b1b 0 3px, #2a2a2a 3px 4px);
+}
+
+.skin-dual .armbase {
+  left: 209px;
+  top: 27px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: conic-gradient(#d4d6d1, #f3f4f0, #babcb7, #e8eae5, #c4c6c1, #f1f2ee, #d4d6d1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+.skin-dual .pivot {
+  background: radial-gradient(circle at 40% 35%, #f6f7f3, #b0b4b0 70%, #808480);
+}
+
+.skin-dual .panel {
+  color: #eadfc6;
+  background: linear-gradient(180deg, #2e2622, #201a17);
+  box-shadow:
+    inset 0 1px 0 #b08d57,
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.skin-dual .brand {
+  color: #c9a46a;
+}
+
+.skin-dual .line-artist {
+  color: #bfb39b;
+}
+
+.skin-dual .screw {
+  background: radial-gradient(circle at 40% 35%, #f0dcb0, #a8874f 70%, #6f5630);
+}
+
+.skin-dual .controls button {
+  border: 1px solid #1a1411;
+  background: radial-gradient(circle at 40% 35%, #fffaf0, #e2d8c2 60%, #b8ad96);
+}
+
+.skin-dual .key .start {
+  color: #e8b04a;
+}
+
+/* Studio */
+
+.skin-studio {
+  --arm-rest: 17.1;
+  --arm-start: 24.1;
+  --arm-end: 44.3;
+  --label-color: #7a1f1f;
+  --lamp-off: #5a1712;
+  --lamp-on: #ff3b2a;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(178deg, transparent 0 3px, rgba(0, 0, 0, 0.08) 3px 4px, transparent 4px 10px, rgba(255, 220, 190, 0.04) 10px 11px),
+    repeating-linear-gradient(182deg, rgba(0, 0, 0, 0.06) 0 19px, transparent 19px 33px, rgba(90, 20, 0, 0.1) 33px 40px),
+    linear-gradient(180deg, #74371f, #66301a 50%, #582815);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.5),
+    0 0 1px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 220, 200, 0.14),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.skin-studio .plate {
+  display: block;
+  inset: 7px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.16) 0 1px, rgba(0, 0, 0, 0.025) 1px 2px, transparent 2px 3px),
+    linear-gradient(160deg, #ecedea, #d6d8d3 55%, #c8cac5);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.skin-studio .strip {
+  display: block;
+  left: 214px;
+  top: 7px;
+  bottom: 7px;
+  width: 48px;
+  background: linear-gradient(90deg, #1d1d1d, #2a2a2a 50%, #1b1b1b);
+  box-shadow:
+    inset 1px 0 0 rgba(255, 255, 255, 0.08),
+    -1px 0 2px rgba(0, 0, 0, 0.35);
+}
+
+.skin-studio .platter {
+  left: 17px;
+  top: 11px;
+  width: 190px;
+  height: 190px;
+  background: radial-gradient(closest-side, #181818 0 96%, #3a3a3a 98%, #0e0e0e 100%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
+}
+
+.skin-studio .mat,
+.skin-studio .slot,
+.skin-studio .sheen {
+  inset: 2px;
+}
+
+.skin-studio .mat {
+  background:
+    radial-gradient(closest-side, #1b1b1b 0 30%, transparent 30.5%),
+    repeating-radial-gradient(circle, #1c1c1c 0 2px, #272727 2px 3px);
+}
+
+.skin-studio .armbase {
+  left: 226px;
+  top: 18px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #1a1a1a 0 6px, transparent 6.5px),
+    conic-gradient(#c9cbc6, #f4f5f1, #a9aca8, #e9ebe6, #b6b8b3, #f1f2ee, #c9cbc6);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+}
+
+.skin-studio .tonearm {
+  left: 238px;
+  top: 30px;
+}
+
+.skin-studio .pivot {
+  left: 233px;
+  top: 25px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #d9dbd6 0 2px, #222 2.5px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.skin-studio .armrest {
+  left: 204px;
+  top: 116px;
+  width: 12px;
+  height: 7px;
+  border-radius: 1.5px;
+  background: linear-gradient(90deg, #9a9e9a, #eef0ec 50%, #8c908c);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.skin-studio .lamp {
+  left: 184px;
+  top: 211px;
+  width: 16px;
+  height: 8px;
+  border-radius: 1px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.skin-studio .panel,
+.skin-studio .controls {
+  position: static;
+}
+
+.skin-studio .screw,
+.skin-studio .brand,
+.skin-studio .key span,
+.skin-studio .line-title,
+.skin-studio .line-artist {
+  display: none;
+}
+
+.skin-studio .line-combined {
+  display: block;
+}
+
+.skin-studio .nameplate {
+  position: absolute;
+  left: 14px;
+  top: 207px;
+  width: 162px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  padding: 0 7px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #1f1f1f, #121212);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.skin-studio .caption {
+  flex: 1;
+  min-width: 0;
+  font: 600 9.5px/1 "Segoe UI", sans-serif;
+  letter-spacing: 0.4px;
+  color: #dcddd9;
+}
+
+.skin-studio .caption.idle {
+  color: #8a8f8c;
+}
+
+.skin-studio .key {
+  position: absolute;
+}
+
+.skin-studio .key:nth-child(1) {
+  left: 226px;
+  top: 94px;
+}
+
+.skin-studio .key:nth-child(3) {
+  left: 244px;
+  top: 94px;
+}
+
+.skin-studio .key:nth-child(2) {
+  left: 221px;
+  top: 178px;
+}
+
+.skin-studio .key:nth-child(2)::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 37px;
+  border: 3px solid transparent;
+  border-bottom: 4px solid #d9dad6;
+  border-top: 0;
+}
+
+.skin-studio .controls button {
+  width: 12px;
+  height: 12px;
+  color: #e8e9e5;
+  background: radial-gradient(circle at 40% 35%, #4a4a4a, #141414 70%);
+  box-shadow:
+    0 0 0 1px #8f938f,
+    0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.skin-studio .controls button svg {
+  width: 6px;
+  height: 6px;
+}
+
+.skin-studio .controls .play {
+  width: 34px;
+  height: 34px;
+  background: none;
+  box-shadow: none;
+}
+
+.deck.skin-studio .controls .play svg:not(.dial) {
+  display: none;
+}
+
+.skin-studio .controls .dial {
+  display: block;
+  width: 34px;
+  height: 34px;
+  transform: rotate(-40deg);
+  transition: transform 0.6s cubic-bezier(0.3, 1.4, 0.5, 1);
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6));
+}
+
+.skin-studio.playing .controls .dial {
+  transform: none;
+}
+
+.dial-ring {
+  fill: #efe8d6;
+  stroke: #8f8a7c;
+  stroke-width: 0.6;
+}
+
+.dial-cap {
+  fill: url(#chrome);
+  stroke: #6f736f;
+  stroke-width: 0.5;
+}
+
+.dial-mark {
+  fill: #2a2a2a;
+}
+
+.dial text {
+  font: 700 5.5px "Segoe UI", sans-serif;
+  fill: #2a2a2a;
+  text-anchor: middle;
+}
+
+.dial text.red {
+  fill: #c0392b;
+}
+
+/* 3D */
+
+.stage {
+  position: absolute;
+  inset: 0;
+  perspective: 1100px;
+  transform-origin: 0 0;
+}
+
+.deck {
+  --thick: 20;
+  --foot: 6;
+  --platter-z: 7;
+  --arm-z: 13;
+  --side: #3a2a1e;
+  --edge: #c9cbc6;
+  --engrave: rgba(255, 236, 214, 0.8);
+  transform-style: preserve-3d;
+}
+
+.platter {
+  transform: translateZ(calc(var(--platter-z) * 1px));
+  transform-style: preserve-3d;
+}
+
+.slot {
+  transform-style: preserve-3d;
+}
+
+.armbase {
+  transform: translateZ(0.5px);
+}
+
+.pivot {
+  transform: translateZ(calc((var(--arm-z) + 1) * 1px));
+}
+
+.tonearm-layer {
+  filter: none;
+  pointer-events: none;
+}
+
+.edge-layer,
+.post-layer {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.edge-layer {
+  background: var(--edge);
+}
+
+.post-layer {
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle at 40% 35%, #e8e9e5, #7d817d);
+}
+
+.face {
+  position: absolute;
+  background: var(--side);
+}
+
+.face-front,
+.face-back {
+  left: 0;
+  width: 100%;
+  height: calc(var(--thick) * 1px);
+  transform-origin: top;
+  transform: rotateX(-90deg);
+}
+
+.face-front {
+  top: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 14px;
+}
+
+.face-back {
+  top: 0;
+}
+
+.face-left,
+.face-right {
+  top: 0;
+  width: calc(var(--thick) * 1px);
+  height: 100%;
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.28);
+}
+
+.face-left {
+  left: 0;
+  transform-origin: left;
+  transform: rotateY(90deg);
+}
+
+.face-right {
+  right: 0;
+  transform-origin: right;
+  transform: rotateY(-90deg);
+}
+
+.front-caption,
+.front-controls {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.deck.side-view .face-front > * {
+  opacity: 1;
+}
+
+.front-caption {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 600 8px/1 "Segoe UI", sans-serif;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--engrave);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+.front-controls {
+  display: flex;
+  gap: 5px;
+  flex: none;
+}
+
+.front-controls button {
+  width: 11px;
+  height: 11px;
+  color: var(--engrave);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.front-controls svg {
+  width: 5px;
+  height: 5px;
+}
+
+.foot {
+  position: absolute;
+  width: 26px;
+  height: calc(var(--foot) * 1px);
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(180deg, #2e2e2e, #0f0f0f);
+  transform-origin: top;
+  transform: translateZ(calc(var(--thick) * -1px)) rotateX(-90deg);
+  pointer-events: none;
+}
+
+.foot:nth-of-type(1) {
+  left: 18px;
+  top: calc(100% - 12px);
+}
+
+.foot:nth-of-type(2) {
+  right: 18px;
+  top: calc(100% - 12px);
+}
+
+.foot:nth-of-type(3) {
+  left: 18px;
+  top: 14px;
+}
+
+.foot:nth-of-type(4) {
+  right: 18px;
+  top: 14px;
+}
+
+.ground {
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  top: -6px;
+  bottom: -16px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.16) 65%, transparent);
+  transform: translateZ(calc((var(--thick) + var(--foot)) * -1px));
+  opacity: var(--tilt-k, 0);
+  pointer-events: none;
+}
+
+.skin-braun {
+  --thick: 16;
+  --foot: 4;
+  --platter-z: 6;
+  --arm-z: 12;
+  --side: linear-gradient(180deg, #2b3130, #1f2422);
+  --edge: #c4c5c0;
+  --engrave: #aab2ae;
+}
+
+.skin-pioneer {
+  --thick: 22;
+  --foot: 7;
+  --platter-z: 8;
+  --arm-z: 14;
+  --side: linear-gradient(180deg, #5d3a21, #472b17);
+  --edge: linear-gradient(90deg, #a7aaa6, #f2f3ef 50%, #a7aaa6);
+}
+
+.skin-dual {
+  --thick: 22;
+  --foot: 6;
+  --platter-z: 8;
+  --arm-z: 14;
+  --side: linear-gradient(180deg, #925d33, #784a26);
+  --edge: linear-gradient(90deg, #a7aaa6, #f2f3ef 50%, #a7aaa6);
+}
+
+.skin-studio {
+  --thick: 20;
+  --foot: 6;
+  --platter-z: 6;
+  --arm-z: 13;
+  --side: linear-gradient(180deg, #66321c, #4f2615);
+  --edge: #1d1d1d;
+}
+
+.billboard {
+  position: absolute;
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+.platter-side {
+  background:
+    linear-gradient(#0d0d0d, #0d0d0d) bottom / 100% 2px no-repeat,
+    linear-gradient(90deg, rgba(0, 0, 0, 0.4), transparent 28%, transparent 72%, rgba(0, 0, 0, 0.4)),
+    var(--edge);
+}
+
+.post-side {
+  background: linear-gradient(90deg, #7d817d, #eef0ec 45%, #7d817d);
+}
+
+.arm-side,
+.weight-side {
+  position: absolute;
+  pointer-events: none;
+}
+
+.arm-side {
+  height: 3px;
+  transform-origin: 0 0;
+  background: linear-gradient(180deg, #8c908c, #f2f3ef, #8c908c);
+}
+
+.arm-side::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: -5px;
+  width: 16px;
+  height: 8px;
+  border-radius: 1px;
+  background: #1c1c1c;
+}
+
+.weight-side {
+  width: 22px;
+  height: 9px;
+  border-radius: 2px;
+  transform-origin: 22px 0;
+  background: linear-gradient(90deg, #8c908c, #f2f3ef 50%, #8c908c);
+}
+
+.deck {
+  --arm-length: 140;
+}
+
+.skin-studio {
+  --arm-length: 150;
+}
+
+.billboard {
+  opacity: var(--side-k, 0);
+}
+
+/* Объёмные кнопки */
+
+.tonearm,
+.tonearm-layer {
+  pointer-events: none;
+}
+
+.panel,
+.controls,
+.key,
+.nameplate,
+.face-front,
+.front-controls {
+  transform-style: preserve-3d;
+}
+
+.controls button,
+.front-controls button {
+  --cap: 3;
+  --rim: #1e1e1e;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--cap) * 1px));
+  transition: transform 0.08s ease;
+}
+
+.controls button:active,
+.front-controls button:active {
+  transform: translateZ(calc(var(--cap) * 0.35px));
+}
+
+.controls button::before,
+.controls button::after,
+.front-controls button::before,
+.front-controls button::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: var(--rim);
+  pointer-events: none;
+}
+
+.controls button::before,
+.front-controls button::before {
+  transform: translateZ(calc(var(--cap) * -0.5px));
+}
+
+.controls button::after,
+.front-controls button::after {
+  transform: translateZ(calc(var(--cap) * -1px));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.front-controls button {
+  --cap: 2;
+  --rim: #111;
+}
+
+.skin-pioneer .controls button {
+  --cap: 4;
+  --rim: linear-gradient(90deg, #6f736f, #d3d5d0 50%, #6f736f);
+}
+
+.skin-dual .controls button {
+  --cap: 4;
+  --rim: linear-gradient(90deg, #8f846d, #d8ceb6 50%, #8f846d);
+}
+
+.skin-studio .controls button {
+  --cap: 3;
+  --rim: #0a0a0a;
+}
+
+.skin-studio .controls .play {
+  --cap: 3;
+  --rim: linear-gradient(90deg, #a39a85, #e2dac6 50%, #a39a85);
+}
+
+.skin-braun .controls button {
+  --cap: 3;
+  --rim: #262b2a;
+  background: radial-gradient(circle at 38% 30%, #5b6462, #3c4442 60%, #303735);
+}
+
+.skin-braun .controls .play {
+  --rim: #9c3027;
+  background: radial-gradient(circle at 38% 30%, #f06a5e, #e0463a 55%, #c43a2f);
+}
