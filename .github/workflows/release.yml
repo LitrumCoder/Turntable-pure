@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Turntable ${{ github.ref_name }}"
+          releaseBody: |
+            Виджет-проигрыватель пластинок для рабочего стола Windows 10/11. Показывает, что играет на компьютере (Spotify, Яндекс Музыка, YouTube в браузере и любой плеер с системными медиа-контролами), с обложкой на вращающейся пластинке.
+
+            **Что внутри**
+            - Четыре скина: Pioneer, Studio, Braun, Dual
+            - 3D-вид: сверху, в перспективе, под углом, спереди. Колесо мыши — наклон, Shift + колесо — поворот
+            - Тонарм показывает прогресс трека, на паузе уходит на стойку
+            - Анимация смены пластинки при переключении трека
+            - Обложки в высоком качестве через iTunes, подсветка корпуса цветом обложки
+            - Перетаскивание с примагничиванием к правому нижнему углу
+            - Скрывается в полноэкранных играх и видео, автозапуск из меню
+
+            **Какой файл скачать**
+            - `Turntable_*_x64-setup.exe` — установщик (рекомендуется)
+            - `Turntable_*_x64_en-US.msi` — установщик MSI
+            - `Turntable-portable-x64.exe` — без установки, просто запустить
+
+            Управление — иконка в трее или правый клик по виджету.
+          releaseDraft: false
+          prerelease: false
+
+      - name: Upload portable exe
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $exe = Get-ChildItem src-tauri/target/release -Filter *.exe | Where-Object { $_.Name -notmatch 'setup' } | Select-Object -First 1
+          Copy-Item $exe.FullName Turntable-portable-x64.exe
+          gh release upload "${{ github.ref_name }}" Turntable-portable-x64.exe --clobber
